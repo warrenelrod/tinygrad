@@ -6,8 +6,8 @@
 # POINTER_SIZE is: 8
 # LONGDOUBLE_SIZE is: 16
 #
-import ctypes, ctypes.util
-
+import ctypes
+from tinygrad.helpers import find_library
 
 class AsDictMixin:
     @classmethod
@@ -145,7 +145,7 @@ def char_pointer_cast(string, encoding='utf-8'):
 
 
 _libraries = {}
-_libraries['libcuda.so'] = ctypes.CDLL(ctypes.util.find_library('cuda'))
+_libraries['libcuda.so'] = ctypes.CDLL(find_library("cuda"))
 
 
 cuuint32_t = ctypes.c_uint32

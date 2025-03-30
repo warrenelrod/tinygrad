@@ -6,11 +6,11 @@
 # POINTER_SIZE is: 8
 # LONGDOUBLE_SIZE is: 16
 #
-import ctypes, ctypes.util
-
+import ctypes
+from tinygrad.helpers import find_library
 
 _libraries = {}
-_libraries['libnvrtc.so'] = ctypes.CDLL(ctypes.util.find_library('nvrtc'))
+_libraries['libnvrtc.so'] = ctypes.CDLL(find_library("nvrtc"))
 def string_cast(char_pointer, encoding='utf-8', errors='strict'):
     value = ctypes.cast(char_pointer, ctypes.c_char_p).value
     if value is not None and encoding is not None:
@@ -138,7 +138,7 @@ class Union(ctypes.Union, AsDictMixin):
 
 
 
-_libraries['libnvJitLink.so'] = ctypes.CDLL(ctypes.util.find_library('nvJitLink'))
+_libraries['libnvJitLink.so'] = ctypes.CDLL(find_library("nvJitLink"))
 c_int128 = ctypes.c_ubyte*16
 c_uint128 = c_int128
 void = None
