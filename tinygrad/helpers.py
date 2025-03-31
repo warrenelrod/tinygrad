@@ -299,7 +299,7 @@ def init_c_struct_t(fields: tuple[tuple[str, ctypes._SimpleCData], ...]):
   return CStruct
 def init_c_var(ctypes_var, creat_cb): return (creat_cb(ctypes_var), ctypes_var)[1]
 def flat_mv(mv:memoryview): return mv if len(mv) == 0 else mv.cast("B", shape=(mv.nbytes,))
-def find_library(dll): return ctypes.util.find_library(dict(cuda='nvcuda.dll', nvrtc='nvrtc64_120_0.dll', nvJitLink='nvJitLink_120_0.dll')[dll] if os.name == "nt" else dll)
+def find_library(dll): return ctypes.util.find_library(dict(cuda='nvcuda.dll', nvrtc='nvrtc64_120_0.dll', nvJitLink='nvJitLink_120_0.dll')[dll] if os.name == "nt" else dll)  # noqa: E501
 
 # *** tqdm
 
