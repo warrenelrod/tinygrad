@@ -299,15 +299,7 @@ def init_c_struct_t(fields: tuple[tuple[str, ctypes._SimpleCData], ...]):
   return CStruct
 def init_c_var(ctypes_var, creat_cb): return (creat_cb(ctypes_var), ctypes_var)[1]
 def flat_mv(mv:memoryview): return mv if len(mv) == 0 else mv.cast("B", shape=(mv.nbytes,))
-def find_library(dll):
-  if sys.platform.startswith("win"):
-    if dll == "cuda": return "nvcuda.dll"    # nvcuda.dll is located in SYSTEM32
-    cutk_bin_dir = pathlib.Path(max(((tuple(map(int, m.group(2).split('.'))), m.group(1)) for p in os.environ.get('PATH','').split(os.pathsep)
-      for m in [re.search(r'(.*NVIDIA GPU Computing Toolkit\\CUDA\\v(\d+(?:\.\d+)?))', p, re.IGNORECASE)] if m), default=(None,None))[1]) / 'bin'  # auto selects the highest version of CUDA in PATH.
-    for filename in os.listdir(cutk_bin_dir):
-      if (filename.startswith(dll+'64_') or filename.startswith(dll+'_')) and filename.endswith(".dll"): return os.path.join(cutk_bin_dir, filename)
-    raise RuntimeError(f"[Win32] The DLL for '{dll}' was not found in the CUDA bin directory. Please verify your CUDA installation.")
-  else: return ctypes.util.find_library(dll)
+def find_library(dll): return ctypes.util.find_library(dict(cuda='nvcuda.dll', nvrtc='nvrtc64_120_0.dll', nvJitLink='nvJitLink_120_0.dll')[dll] if os.name == "nt" else dll)
 
 # *** tqdm
 

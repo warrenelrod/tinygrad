@@ -39,6 +39,14 @@ def _try_dlopen_$name():
 EOF
 }
 
+is_windows() {
+  if [[ "$OS" == "Windows_NT" || "$(uname -s)" =~ MINGW || "$(uname -s)" =~ MSYS ]]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
 generate_opencl() {
   clang2py /usr/include/CL/cl.h -o $BASE/opencl.py -l /usr/lib/x86_64-linux-gnu/libOpenCL.so.1 -k cdefstum
   fixup $BASE/opencl.py
