@@ -94,7 +94,7 @@ generate_kfd() {
   python3 -c "import tinygrad.runtime.autogen.kfd"
 }
 
-generate_cuda() {
+generate_cuda_linux() {
   clang2py /usr/include/cuda.h -o $BASE/cuda.py -l /usr/lib/x86_64-linux-gnu/libcuda.so
   sed -i "s\import ctypes\import ctypes, ctypes.util\g" $BASE/cuda.py
   sed -i "s\ctypes.CDLL('/usr/lib/x86_64-linux-gnu/libcuda.so')\ctypes.CDLL(ctypes.util.find_library('cuda'))\g" $BASE/cuda.py
@@ -102,13 +102,54 @@ generate_cuda() {
   python3 -c "import tinygrad.runtime.autogen.cuda"
 }
 
-generate_nvrtc() {
+generate_cuda_windows() {
+  if [ -z "$CUDA_PATH" ]; then
+    echo "CUDA_PATH environment variable is not set. Please set it to your CUDA installation path."
+    exit 1
+  fi
+  CUDA_PATH="${CUDA_PATH//\\//}"
+  clang2py "$CUDA_PATH/include/cuda.h" -o "$BASE/cuda.py" -l nvcuda.dll
+  fixup "$BASE/cuda.py"
+  python -c "import tinygrad.runtime.autogen.cuda"
+}
+
+generate_cuda() {
+  if is_windows; then
+    generate_cuda_windows
+  else
+    generate_cuda_linux
+  fi
+}
+
+generate_nvrtc_linux() {
   clang2py /usr/local/cuda/include/nvrtc.h /usr/local/cuda/include/nvJitLink.h -o $BASE/nvrtc.py -l /usr/local/cuda/lib64/libnvrtc.so -l /usr/local/cuda/lib64/libnvJitLink.so
   sed -i "s\import ctypes\import ctypes, ctypes.util\g" $BASE/nvrtc.py
   sed -i "s\ctypes.CDLL('/usr/local/cuda/lib64/libnvrtc.so')\ctypes.CDLL(ctypes.util.find_library('nvrtc'))\g" $BASE/nvrtc.py
   sed -i "s\ctypes.CDLL('/usr/local/cuda/lib64/libnvJitLink.so')\ctypes.CDLL(ctypes.util.find_library('nvJitLink'))\g" $BASE/nvrtc.py
   fixup $BASE/nvrtc.py
   python3 -c "import tinygrad.runtime.autogen.nvrtc"
+}
+
+generate_nvrtc_windows() {
+  if [ -z "$CUDA_PATH" ]; then
+    echo "CUDA_PATH environment variable is not set. Please set it to your CUDA installation path."
+    exit 1
+  fi
+  CUDA_PATH="${CUDA_PATH//\\//}"
+  clang2py "$CUDA_PATH/include/nvrtc.h" "$CUDA_PATH/include/nvJitLink.h" \
+    -o "$BASE/nvrtc.py" \
+    -l "$CUDA_PATH/bin/nvrtc64_120_0.dll" \
+    -l "$CUDA_PATH/bin/nvJitLink_120_0.dll"
+  fixup "$BASE/nvrtc.py"
+  python -c "import tinygrad.runtime.autogen.nvrtc"
+}
+
+generate_nvrtc() {
+  if is_windows; then
+    generate_nvrtc_windows
+  else
+    generate_nvrtc_linux
+  fi
 }
 
 generate_nv() {
